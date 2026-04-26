@@ -1,8 +1,8 @@
-<iframe src="https://assets.pinterest.com/ext/embed.html?id=879257527266049747" height="445" width="345" frameborder="0" scrolling="no" ></iframe>
-
 <div align="center">
 
-# NEXUS
+<img src="https://i.pinimg.com/originals/13/6b/e5/136be51beafe804dae49d2d56b64c75b.jpg" width="200" style="border-radius: 16px;" />
+
+# Netyc Software Library
 
 **Enterprise-Grade Digital Asset Management & Collaboration Platform**
 
@@ -27,7 +27,7 @@
 
 ## Overview
 
-Nexus is an enterprise-grade platform engineered for secure digital asset management, real-time collaboration, and structured version control. Designed with scalability and zero-trust security as first principles, Nexus delivers a high-performance workspace environment for organizations that demand complete control over their digital infrastructure.
+Netyc Software Library is an enterprise-grade platform engineered for secure digital asset management, real-time collaboration, and structured version control. Designed with scalability and zero-trust security as first principles, it delivers a high-performance workspace environment for organizations that demand complete control over their digital infrastructure.
 
 The platform integrates a globally distributed backend, an immutable audit trail architecture, and an AI-powered analytics engine — consolidated into a single, cohesive interface.
 
@@ -108,7 +108,7 @@ npm run build
 
 ## Security Architecture
 
-Nexus enforces a **Zero-Trust** security posture at every layer of the stack.
+Netyc Software Library enforces a **Zero-Trust** security posture at every layer of the stack.
 
 - **Firestore Security Rules** — All database paths are deny-by-default. Explicit, validated rules govern every read and write operation.
 - **Attribute-Based Access Control (ABAC)** — Fine-grained access policies mapped to user identity attributes.

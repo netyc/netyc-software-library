@@ -1,0 +1,128 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-\\.]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'createdAt', 'updatedAt']) 
+        && data.uid is string && data.uid.size() > 0 
+        && data.email is string && data.email.size() > 0;
+    }
+
+    function isValidRepo(data) {
+      return data.keys().hasAll(['id', 'name', 'owner', 'ownerId', 'description', 'language', 'stars', 'forks', 'isPrivate', 'files', 'updatedAt', 'createdAt'])
+        && data.name is string && data.name.size() > 0
+        && data.ownerId is string && data.ownerId.size() > 0
+        && data.files is list;
+    }
+    
+    match /usernames/{username} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() 
+        && username.matches('^[a-z0-9]+$') 
+        && request.auth.uid == incoming().uid;
+      allow delete: if isSignedIn() && existing().uid == request.auth.uid;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(userId) && request.auth.uid == userId && isValidUser(incoming()) && incoming().createdAt == request.time;
+      allow update: if isSignedIn() && isValidId(userId) && request.auth.uid == userId 
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'bio', 'appLockEnabled', 'appLockPin', 'privacyDefault', 'lastActive', 'username', 'lastUsernameChange', 'updatedAt'])
+        && (
+           !('username' in incoming().diff(existing()).affectedKeys()) 
+           || (
+              incoming().username.matches('^[a-z0-9]+$')
+              && (
+                !("lastUsernameChange" in existing()) 
+                || (request.time.toMillis() - existing().lastUsernameChange.toMillis() > 31536000000)
+              )
+              && incoming().lastUsernameChange == request.time
+           )
+        )
+        && incoming().updatedAt == request.time;
+    }
+
+    function isValidChat(data) {
+      return data.keys().hasAll(['isGroup', 'participantIds', 'createdAt', 'updatedAt'])
+        && data.isGroup is bool
+        && data.participantIds is list
+        && data.participantIds.size() > 0;
+    }
+
+    match /globalChats/{chatId}/messages/{messageId} {
+      allow get: if isSignedIn() && isValidId(chatId) && isValidId(messageId);
+      allow list: if isSignedIn() && isValidId(chatId);
+      allow create: if isSignedIn() && isValidId(chatId) && isValidId(messageId)
+        && (
+          (chatId == 'public') ||
+          (chatId == 'announcements' && request.auth.token.email == "muhammadnaufalmushaddiq@gmail.com")
+        )
+        && incoming().createdAt == request.time;
+      allow update: if isSignedIn() && isValidId(chatId) && isValidId(messageId)
+        && (request.auth.uid == existing().senderId || request.auth.token.email == "muhammadnaufalmushaddiq@gmail.com")
+        && incoming().diff(existing()).affectedKeys().hasOnly(['text', 'updatedAt'])
+        && incoming().updatedAt == request.time;
+      allow delete: if isSignedIn() && isValidId(chatId) && isValidId(messageId)
+        && (request.auth.uid == existing().senderId || request.auth.token.email == "muhammadnaufalmushaddiq@gmail.com");
+    }
+
+    match /chats/{chatId} {
+      allow get: if isSignedIn() && isValidId(chatId) && request.auth.uid in existing().participantIds;
+      allow list: if isSignedIn() && request.auth.uid in existing().participantIds;
+      allow create: if isSignedIn() && isValidId(chatId) && request.auth.uid in incoming().participantIds && isValidChat(incoming()) && incoming().createdAt == request.time;
+      allow update: if isSignedIn() && isValidId(chatId) && request.auth.uid in existing().participantIds
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'participantIds', 'lastMessage', 'lastMessageTime', 'updatedAt'])
+        && incoming().updatedAt == request.time;
+      allow delete: if isSignedIn() && isValidId(chatId) && request.auth.uid in existing().participantIds;
+      
+      match /messages/{messageId} {
+        allow get: if isSignedIn() && isValidId(chatId) && isValidId(messageId) && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds;
+        allow list: if isSignedIn() && isValidId(chatId) && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds;
+        allow create: if isSignedIn() && isValidId(chatId) && isValidId(messageId) && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds && request.auth.uid == incoming().senderId && incoming().createdAt == request.time;
+        allow update: if isSignedIn() && isValidId(chatId) && isValidId(messageId) 
+          && request.auth.uid == existing().senderId
+          && incoming().diff(existing()).affectedKeys().hasOnly(['text', 'updatedAt'])
+          && incoming().updatedAt == request.time;
+        allow delete: if isSignedIn() && isValidId(chatId) && isValidId(messageId) 
+          && request.auth.uid == existing().senderId;
+      }
+    }
+
+    match /repositories/{repoId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidId(repoId) && request.auth.uid == incoming().ownerId && isValidRepo(incoming()) && incoming().createdAt == request.time;
+      allow update: if isSignedIn() && isValidId(repoId)
+        && incoming().updatedAt == request.time
+        && (
+            (request.auth.uid == existing().ownerId && incoming().diff(existing()).affectedKeys().hasOnly(['files', 'stars', 'forks', 'watches', 'issues', 'starredBy', 'viewedBy', 'isPrivate', 'updatedAt']))
+            ||
+            (incoming().diff(existing()).affectedKeys().hasOnly(['files', 'stars', 'forks', 'watches', 'issues', 'starredBy', 'viewedBy', 'updatedAt']))
+        );
+      allow delete: if isSignedIn() && isValidId(repoId) && (request.auth.uid == existing().ownerId || request.auth.token.email == 'muhammadnaufalmushaddiq@gmail.com');
+    }
+    function isValidNote(data) {
+      return data.keys().hasAll(['userId', 'title', 'content', 'createdAt', 'updatedAt'])
+        && data.userId is string && data.userId.size() > 0
+        && data.title is string
+        && data.content is string;
+    }
+
+    match /user_notes/{noteId} {
+      allow read: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(noteId) && request.auth.uid == incoming().userId && isValidNote(incoming()) && incoming().createdAt == request.time;
+      allow update: if isSignedIn() && isValidId(noteId) && request.auth.uid == existing().userId
+        && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'content', 'updatedAt'])
+        && incoming().updatedAt == request.time;
+      allow delete: if isSignedIn() && isValidId(noteId) && request.auth.uid == existing().userId;
+    }
+  }
+}

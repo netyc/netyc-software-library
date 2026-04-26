@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0C0C0C;
+  --color-text: #F2F2F2;
+  --color-accent: #00BFFF;
+  --color-muted: #4A4A4A;
+  --color-line: #2A2A2A;
+  
+  --font-display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-display);
+}
+
+html[data-theme="light"] body {
+  /* Invert all dark colors but preserve the hue so the accent color remains consistent */
+  filter: invert(1) hue-rotate(180deg);
+  background-color: var(--color-bg);
+}
+
+/* Re-invert media like images and videos so they look normal */
+html[data-theme="light"] img,
+html[data-theme="light"] video,
+html[data-theme="light"] canvas {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.markdown-body h1 {
+  font-size: 2em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--color-line);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+.markdown-body h2 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--color-line);
+  margin-bottom: 16px;
+  margin-top: 24px;
+  font-weight: 600;
+}
+.markdown-body h3 {
+  font-size: 1.25em;
+  margin-bottom: 16px;
+  margin-top: 24px;
+  font-weight: 600;
+}
+.markdown-body p, .markdown-body ul, .markdown-body ol {
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.markdown-body ul {
+  list-style-type: disc;
+  padding-left: 2em;
+}
+.markdown-body ol {
+  list-style-type: decimal;
+  padding-left: 2em;
+}
+.markdown-body blockquote {
+  padding: 0 1em;
+  color: var(--color-muted);
+  border-left: 0.25em solid var(--color-line);
+  margin-bottom: 16px;
+}
+.markdown-body a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.markdown-body a:hover {
+  text-decoration: underline;
+}
+

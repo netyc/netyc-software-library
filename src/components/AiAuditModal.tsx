@@ -17,7 +17,9 @@ export function AiAuditModal({ repo, onClose }: AiAuditModalProps) {
   useEffect(() => {
     const runAudit = async () => {
       try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || (process.env.GEMINI_API_KEY as string);
+        if (!apiKey) throw new Error('GEMINI_API_KEY is not set');
+        const ai = new GoogleGenAI({ apiKey });
         
         // Find readme content if available
         let corpus = repo.description || "No description available.";
@@ -32,7 +34,7 @@ export function AiAuditModal({ repo, onClose }: AiAuditModalProps) {
         }
 
         const response = await ai.models.generateContent({
-          model: "gemini-3.1-pro-preview",
+          model: "gemini-2.0-flash",
           contents: `You are an AI archivist. The user wants to know what this repository (${repo.name}) is about BEFORE exploring it. 
           Provide a highly concise, witty, and cyber-themed summary in roughly 2-3 short paragraphs in Indonesian language.
           Data available: ${corpus.substring(0, 5000)}`,

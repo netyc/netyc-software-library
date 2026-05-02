@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { Bot, X, Volume2, Loader2, Sparkles } from "lucide-react";
-import { GoogleGenAI } from "@google/genai";
 import Markdown from "react-markdown";
 
 interface AiAuditModalProps {
@@ -17,9 +16,8 @@ export function AiAuditModal({ repo, onClose }: AiAuditModalProps) {
   useEffect(() => {
     const runAudit = async () => {
       try {
-        const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || (process.env.GEMINI_API_KEY as string);
-        if (!apiKey) throw new Error('GEMINI_API_KEY is not set');
-        const ai = new GoogleGenAI({ apiKey });
+        const apiKey = (import.meta.env.VITE_GROQ_API_KEY as string) || (process.env.GROQ_API_KEY as string);
+        if (!apiKey) throw new Error('GROQ_API_KEY is not set');
         
         // Find readme content if available
         let corpus = repo.description || "No description available.";
@@ -33,14 +31,33 @@ export function AiAuditModal({ repo, onClose }: AiAuditModalProps) {
            }
         }
 
-        const response = await ai.models.generateContent({
-          model: "gemini-2.0-flash",
-          contents: `You are an AI archivist. The user wants to know what this repository (${repo.name}) is about BEFORE exploring it. 
-          Provide a highly concise, witty, and cyber-themed summary in roughly 2-3 short paragraphs in Indonesian language.
-          Data available: ${corpus.substring(0, 5000)}`,
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "llama-3.1-8b-instant",
+            messages: [
+              {
+                role: "system",
+                content: `You are an AI archivist. The user wants to know what this repository (${repo.name}) is about BEFORE exploring it. \n          Provide a highly concise, witty, and cyber-themed summary in roughly 2-3 short paragraphs in Indonesian language.`
+              },
+              {
+                role: "user",
+                content: `Data available: ${corpus.substring(0, 5000)}`
+              }
+            ]
+          })
         });
 
-        const text = response.text || "Failed to analyze archive.";
+        if (!response.ok) {
+           throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const text = data.choices[0]?.message?.content || "Failed to analyze archive.";
         setSummary(text);
         
         // Try auto-play audio (browsers might block it)

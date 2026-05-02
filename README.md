@@ -40,7 +40,7 @@ The platform integrates a globally distributed backend, an immutable audit trail
 | **Access Control Layer** | Tiered identity management with Firebase ABAC enforcement |
 | **Global Communications Relay** | Real-time encrypted messaging with dedicated broadcast channels |
 | **Immutable Object Storage** | High-resilience file archiving with metadata tagging and versioning |
-| **AI Audit Engine** | Automated codebase inspection and anomaly detection via Gemini AI |
+| **AI Audit Engine** | Automated codebase inspection and anomaly detection via Groq AI (Llama 3.1) |
 | **Neural Analytics Dashboard** | Visual matrix representations of activity vectors and system health |
 | **Identity & Profile Management** | Strict username constraints, avatar resolution, and session control |
 
@@ -56,7 +56,7 @@ Styling          Tailwind CSS 4.1
 Routing          React Router DOM 7
 Real-time DB     Google Cloud Firestore
 Authentication   Firebase Auth
-AI Integration   Google Generative AI (Gemini)
+AI Integration   Groq API (Llama 3.1)
 Animation        Motion / React
 Charts           Recharts
 ```

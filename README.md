@@ -63,49 +63,6 @@ Charts           Recharts
 
 ---
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js `>= 18.x`
-- npm `>= 9.x`
-- A configured Firebase project
-
-### Installation
-
-Clone the repository and install all dependencies:
-
-```bash
-git clone https://github.com/zero0-sys/netyc-software-library.git
-cd netyc-software-library
-npm install
-```
-
-### Environment Configuration
-
-Copy the example environment file and populate the required variables:
-
-```bash
-cp .env.example .env
-```
-
-Configure your Firebase credentials inside `.env` before proceeding.
-
-### Running Locally
-
-```bash
-# Start local development server at http://localhost:3000
-npm run dev
-
-# Type-check without emitting output
-npm run lint
-
-# Construct production bundle
-npm run build
-```
-
----
-
 ## Security Architecture
 
 Netyc Software Library enforces a **Zero-Trust** security posture at every layer of the stack.
@@ -141,7 +98,7 @@ Netyc Software Library enforces a **Zero-Trust** security posture at every layer
 
 ## Licensing
 
-Copyright (c) 2026 **Muhammad Naufal Mushaddiq**. All Rights Reserved.
+Copyright (c) 2026 **Netyc**. All Rights Reserved.
 
 This software is strictly proprietary. No permission is granted to use, copy, modify, merge, publish, distribute, sublicense, or sell copies of this software without explicit written authorization from the author.
 
@@ -151,7 +108,7 @@ Review the full terms in the [LICENSE](./LICENSE) file before proceeding.
 
 <div align="center">
 
-Built and maintained by **Muhammad Naufal Mushaddiq**
+Built and maintained by **Netyc**
 
 ![Maintained](https://img.shields.io/badge/Maintained-Yes-22c55e?style=flat-square&labelColor=0f172a)
 ![Made with](https://img.shields.io/badge/Made_with-TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white&labelColor=1e293b)
